@@ -66,21 +66,21 @@ pair<int, pair<int, int>> choose_team_sizes(int pizzas_cnt, int team_2_cnt, int 
 
     if (pizzas_left > 0)
     {
-        team_2_amount = min(pizzas_left / 2, team_2_cnt);
-        pizzas_left -= team_2_amount;
+        team_4_amount = min(pizzas_left / 4, team_4_cnt);
+        pizzas_left -= 4 * team_4_amount;
     }
 
     if (pizzas_left > 0)
     {
         team_3_amount = min(pizzas_left / 3, team_3_cnt);
 
-        pizzas_left -= team_3_amount;
+        pizzas_left -= 3 * team_3_amount;
     }
 
     if (pizzas_left > 0)
     {
-        team_4_amount = min(pizzas_left / 4, team_4_cnt);
-        pizzas_left -= team_4_amount;
+        team_2_amount = min(pizzas_left / 2, team_2_cnt);
+        pizzas_left -= 2 * team_2_amount;
     }
 
     return {team_2_amount, {team_3_amount, team_4_amount}};
