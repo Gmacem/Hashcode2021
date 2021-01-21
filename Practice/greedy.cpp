@@ -66,20 +66,21 @@ pair<int, pair<int, int>> choose_team_sizes(int pizzas_cnt, int team_2_cnt, int 
 
     if (pizzas_left > 0)
     {
-        team_2_amount = pizzas_left / (2 * team_2_cnt);
-        pizzas_left -= team_2_amount * 2;
+        team_2_amount = min(pizzas_left / 2, team_2_cnt);
+        pizzas_left -= team_2_amount;
     }
 
     if (pizzas_left > 0)
     {
-        team_3_amount = pizzas_left / (3 * team_3_cnt);
-        pizzas_left -= team_3_amount * 3;
+        team_3_amount = min(pizzas_left / 3, team_3_cnt);
+
+        pizzas_left -= team_3_amount;
     }
 
     if (pizzas_left > 0)
     {
-        team_4_amount = pizzas_left / (4 * team_3_cnt);
-        pizzas_left -= team_3_amount * 4;
+        team_4_amount = min(pizzas_left / 4, team_4_cnt);
+        pizzas_left -= team_4_amount;
     }
 
     return {team_2_amount, {team_3_amount, team_4_amount}};
@@ -134,49 +135,16 @@ int GetHash(const string &s)
     return (int)hash;
 }
 
-void solve()
+void distribute_pizzas(int &amount, int team_size, unordered_set<Pizza, PizzaHash> &pizza_ingr, vector<vector<int>> &delivered_pizzas)
 {
-    int pizzas_cnt, team_2_cnt, team_3_cnt, team_4_cnt;
-    cin >> pizzas_cnt >> team_2_cnt >> team_3_cnt >> team_4_cnt;
-
-    vector<vector<int>> input(pizzas_cnt);
-    unordered_set<Pizza, PizzaHash> pizza_ingr;
-
-    for (int i = 0; i < pizzas_cnt; ++i)
-    {
-        int k;
-        cin >> k;
-        for (int j = 0; j < k; ++j)
-        {
-            string s;
-            cin >> s;
-            input[i].push_back(GetHash(s));
-        }
-    }
-
-    for (int i = 0; i < pizzas_cnt; ++i)
-    {
-        Pizza pizza;
-
-        pizza.id = i + 1;
-        pizza.ingredients = input[i];
-
-        pizza_ingr.emplace(pizza);
-    }
-
-    pair<int, pair<int, int>> team_sizes = choose_team_sizes(pizzas_cnt, team_2_cnt, team_3_cnt, team_4_cnt);
-
-    //Output: need vector<vector<int>> delivered_pizzas - indices of delivered pizzas to one team
-    vector<vector<int>> delivered_pizzas = {};
-
-    while (team_sizes.first > 0)
+    while (amount > 0)
     {
         unordered_set<int> current_ingredients;
         vector<int> pizzas;
 
-        for (int j = 0; j < 2; j++)
+        for (int j = 0; j < team_size; j++)
         {
-            int max_addition = 0;
+            int max_addition = -1;
             Pizza max_pizza;
 
             for (Pizza pizza : pizza_ingr)
@@ -214,100 +182,50 @@ void solve()
             delivered_pizzas.back().push_back(id);
         }
 
-        team_sizes.first--;
+        amount--;
     }
+}
 
-    while (team_sizes.second.first > 0)
+void solve()
+{
+    int pizzas_cnt, team_2_cnt, team_3_cnt, team_4_cnt;
+    cin >> pizzas_cnt >> team_2_cnt >> team_3_cnt >> team_4_cnt;
+
+    vector<vector<int>> input(pizzas_cnt);
+    unordered_set<Pizza, PizzaHash> pizza_ingr;
+
+    for (int i = 0; i < pizzas_cnt; ++i)
     {
-        unordered_set<int> current_ingredients;
-        vector<int> pizzas;
-
-        for (int j = 0; j < 3; j++)
+        int k;
+        cin >> k;
+        for (int j = 0; j < k; ++j)
         {
-            int max_addition = 0;
-            Pizza max_pizza;
-
-            for (Pizza pizza : pizza_ingr)
-            {
-                int current_addition = 0;
-                for (int ingr : pizza.ingredients)
-                {
-                    if (current_ingredients.count(ingr) == 0)
-                    {
-                        current_addition++;
-                    }
-                }
-
-                if (current_addition > max_addition)
-                {
-                    max_addition = current_addition;
-                    max_pizza = pizza;
-                }
-            }
-
-            for (int ingr : max_pizza.ingredients)
-            {
-                current_ingredients.emplace(ingr);
-            }
-
-            pizzas.push_back(max_pizza.id);
+            string s;
+            cin >> s;
+            input[i].push_back(GetHash(s));
         }
-
-        delivered_pizzas.push_back(vector<int>());
-
-        for (int id : pizzas)
-        {
-            delivered_pizzas.back().push_back(id);
-        }
-
-        team_sizes.second.first--;
     }
 
-    while (team_sizes.second.second > 0)
+    for (int i = 0; i < pizzas_cnt; ++i)
     {
-        unordered_set<int> current_ingredients;
-        vector<int> pizzas;
+        Pizza pizza;
 
-        for (int j = 0; j < 4; j++)
-        {
-            int max_addition = 0;
-            Pizza max_pizza;
+        pizza.id = i;
+        pizza.ingredients = input[i];
 
-            for (Pizza pizza : pizza_ingr)
-            {
-                int current_addition = 0;
-                for (int ingr : pizza.ingredients)
-                {
-                    if (current_ingredients.count(ingr) == 0)
-                    {
-                        current_addition++;
-                    }
-                }
-
-                if (current_addition > max_addition)
-                {
-                    max_addition = current_addition;
-                    max_pizza = pizza;
-                }
-            }
-
-            for (int ingr : max_pizza.ingredients)
-            {
-                current_ingredients.emplace(ingr);
-            }
-
-            pizzas.push_back(max_pizza.id);
-        }
-
-        delivered_pizzas.push_back(vector<int>());
-
-        for (int id : pizzas)
-        {
-            delivered_pizzas.back().push_back(id);
-        }
-
-        team_sizes.second.second--;
+        pizza_ingr.emplace(pizza);
     }
+
+    pair<int, pair<int, int>> team_sizes = choose_team_sizes(pizzas_cnt, team_2_cnt, team_3_cnt, team_4_cnt);
+
+    //Output: need vector<vector<int>> delivered_pizzas - indices of delivered pizzas to one team
+    vector<vector<int>> delivered_pizzas = {};
+
+    distribute_pizzas(team_sizes.first, 2, pizza_ingr, delivered_pizzas);
+
+    distribute_pizzas(team_sizes.second.first, 3, pizza_ingr, delivered_pizzas);
+
+    distribute_pizzas(team_sizes.second.second, 4, pizza_ingr, delivered_pizzas);
 
     cout << delivered_pizzas.size() << "\n";
     for (auto &team_pizzas_ind : delivered_pizzas)
