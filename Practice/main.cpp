@@ -56,6 +56,17 @@ const int MAX_N = 1e6 + 1;
 const int INF = 1e15 + 7;
 const int MOD = 1e9 + 7;
 
+int GetHash(const string& s) {
+	ll hash = 0;
+	const int HASH_MOD = 1e9 + 7;
+	const ll PRIME = 97;
+	for (auto c : s) {
+		int c_hash = c != '-' ? (c - 'a' + 1) : 27;
+		hash = ((hash * PRIME) % HASH_MOD + c_hash) % HASH_MOD;
+	}
+	return (int)hash;
+}
+
 void solve() {
 	//Input
 	int pizzas_cnt, team_2_cnt, team_3_cnt, team_4_cnt;
@@ -73,15 +84,14 @@ void solve() {
 
 
 	//Output: need vector<vector<int>> delivered_pizzas - indices of delivered pizzas to one team
-	vector<vector<int>> delivered_pizzas = { {1, 4}, {0, 2, 3}, {5, 6, 7, 8}, {1, 4}, {0, 2, 3}, {5, 6, 7, 8} };
-	cout << "Pizza are delivered to " << delivered_pizzas.size() << " teams\n";
+	//Example: vector<vector<int>> delivered_pizzas = { {1, 4}, {0, 2, 3}, {5, 6, 7, 8}, {1, 4}, {0, 2, 3}, {5, 6, 7, 8} };
+	cout << delivered_pizzas.size() << "\n";
 	for (auto& team_pizzas_ind : delivered_pizzas) {
-		cout << "A " << team_pizzas_ind.size() << "-person team will receive ";
-		cout << "Pizza " << team_pizzas_ind[0];
-		for (int j = 1; j < team_pizzas_ind.size() - 1; ++j) {
-			cout << ", Pizza " << team_pizzas_ind[j];
+		cout << team_pizzas_ind.size();
+		for (auto pizza_ind : team_pizzas_ind) {
+			cout << " " << pizza_ind;
 		}
-		cout << " and Pizza " << team_pizzas_ind.back() << "\n";
+		cout << "\n";
 	}
 	
 }
