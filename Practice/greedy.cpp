@@ -88,9 +88,7 @@ pair<int, pair<int, int>> choose_team_sizes(int pizzas_cnt, int team_2_cnt, int 
 
 struct Pizza
 {
-    Pizza() {}
-
-    Pizza(int i) : id(i) {}
+    Pizza(int i, vector<int> &ingr) : id(i), ingredients(ingr) {}
 
     Pizza &operator=(const Pizza &other)
     {
@@ -101,10 +99,10 @@ struct Pizza
 
     bool operator==(const Pizza &other) const
     {
-        return id == other.id && ingredients == other.ingredients;
+        return id == other.id;
     }
 
-    vector<int> ingredients;
+    vector<int> &ingredients;
     int id = -1;
 };
 
@@ -135,6 +133,9 @@ int GetHash(const string &s)
     return (int)hash;
 }
 
+vector<int> emptyVector;
+Pizza EmptyPizza(-1, emptyVector);
+
 void distribute_pizzas(int &amount, int team_size, unordered_set<Pizza, PizzaHash> &pizza_ingr, vector<vector<int>> &delivered_pizzas)
 {
     while (amount > 0)
@@ -145,7 +146,7 @@ void distribute_pizzas(int &amount, int team_size, unordered_set<Pizza, PizzaHas
         for (int j = 0; j < team_size; j++)
         {
             int max_addition = -1;
-            Pizza max_pizza;
+            Pizza &max_pizza = EmptyPizza;
 
             for (Pizza pizza : pizza_ingr)
             {
@@ -214,10 +215,7 @@ void solve()
 
     for (int i = 0; i < pizzas_cnt; ++i)
     {
-        Pizza pizza;
-
-        pizza.id = i;
-        pizza.ingredients = input[i];
+        Pizza pizza(i, input[i]);
 
         pizza_ingr.emplace(pizza);
     }
