@@ -165,21 +165,27 @@ void distribute_pizzas(int &amount, int team_size, unordered_set<Pizza, PizzaHas
                 }
             }
 
-            for (int ingr : max_pizza.ingredients)
+            if (max_addition != -1)
             {
-                current_ingredients.emplace(ingr);
+                for (int ingr : max_pizza.ingredients)
+                {
+                    current_ingredients.emplace(ingr);
+                }
+
+                pizzas.push_back(max_pizza.id);
+
+                pizza_ingr.erase(pizza_ingr.find(max_pizza));
             }
-
-            pizzas.push_back(max_pizza.id);
-
-            pizza_ingr.erase(pizza_ingr.find(max_pizza));
         }
 
-        delivered_pizzas.push_back(vector<int>());
-
-        for (int id : pizzas)
+        if (pizzas.size() == team_size)
         {
-            delivered_pizzas.back().push_back(id);
+            delivered_pizzas.push_back(vector<int>());
+
+            for (int id : pizzas)
+            {
+                delivered_pizzas.back().push_back(id);
+            }
         }
 
         amount--;
