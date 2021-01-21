@@ -1,2 +1,2 @@
 # Hashcode2021
-Hashcode 2020 solution
+Hashcode 2021 solution
