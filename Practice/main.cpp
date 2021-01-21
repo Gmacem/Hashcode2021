@@ -72,6 +72,18 @@ void solve() {
 	}
 
 
+	//Output: need vector<vector<int>> delivered_pizzas - indices of delivered pizzas to one team
+	vector<vector<int>> delivered_pizzas = { {1, 4}, {0, 2, 3}, {5, 6, 7, 8}, {1, 4}, {0, 2, 3}, {5, 6, 7, 8} };
+	cout << "Pizza are delivered to " << delivered_pizzas.size() << " teams\n";
+	for (auto& team_pizzas_ind : delivered_pizzas) {
+		cout << "A " << team_pizzas_ind.size() << "-person team will receive ";
+		cout << "Pizza " << team_pizzas_ind[0];
+		for (int j = 1; j < team_pizzas_ind.size() - 1; ++j) {
+			cout << ", Pizza " << team_pizzas_ind[j];
+		}
+		cout << " and Pizza " << team_pizzas_ind.back() << "\n";
+	}
+	
 }
 
 
