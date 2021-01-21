@@ -66,8 +66,8 @@ pair<int, pair<int, int>> choose_team_sizes(int pizzas_cnt, int team_2_cnt, int 
 
     if (pizzas_left > 0)
     {
-        team_4_amount = min(pizzas_left / 4, team_4_cnt);
-        pizzas_left -= team_4_amount;
+        team_2_amount = min(pizzas_left / 2, team_2_cnt);
+        pizzas_left -= team_2_amount;
     }
 
     if (pizzas_left > 0)
@@ -79,8 +79,8 @@ pair<int, pair<int, int>> choose_team_sizes(int pizzas_cnt, int team_2_cnt, int 
 
     if (pizzas_left > 0)
     {
-        team_2_amount = min(pizzas_left / 2, team_2_cnt);
-        pizzas_left -= team_2_amount;
+        team_4_amount = min(pizzas_left / 4, team_4_cnt);
+        pizzas_left -= team_4_amount;
     }
 
     return {team_2_amount, {team_3_amount, team_4_amount}};
@@ -148,6 +148,7 @@ void distribute_pizzas(int &amount, int team_size, unordered_set<Pizza, PizzaHas
             int max_addition = -1;
             Pizza &max_pizza = EmptyPizza;
 
+            int counter = 0;
             for (Pizza pizza : pizza_ingr)
             {
                 int current_addition = 0;
@@ -164,6 +165,9 @@ void distribute_pizzas(int &amount, int team_size, unordered_set<Pizza, PizzaHas
                     max_addition = current_addition;
                     max_pizza = pizza;
                 }
+
+                if (counter++ > 1000 && max_addition > -1)
+                    break;
             }
 
             if (max_addition != -1)
@@ -225,11 +229,11 @@ void solve()
     //Output: need vector<vector<int>> delivered_pizzas - indices of delivered pizzas to one team
     vector<vector<int>> delivered_pizzas = {};
 
-    distribute_pizzas(team_sizes.second.second, 4, pizza_ingr, delivered_pizzas);
+    distribute_pizzas(team_sizes.first, 2, pizza_ingr, delivered_pizzas);
 
     distribute_pizzas(team_sizes.second.first, 3, pizza_ingr, delivered_pizzas);
 
-    distribute_pizzas(team_sizes.first, 2, pizza_ingr, delivered_pizzas);
+    distribute_pizzas(team_sizes.second.second, 4, pizza_ingr, delivered_pizzas);
 
     cout << delivered_pizzas.size() << "\n";
     for (auto &team_pizzas_ind : delivered_pizzas)
