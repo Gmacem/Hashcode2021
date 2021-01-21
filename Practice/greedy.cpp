@@ -64,8 +64,11 @@ pair<int, pair<int, int>> choose_team_sizes(int pizzas_cnt, int team_2_cnt, int 
     int pizzas_left = pizzas_cnt;
     int team_2_amount, team_3_amount, team_4_amount = 0;
 
-    team_2_amount = pizzas_left / (2 * team_2_cnt);
-    pizzas_left -= team_2_amount * 2;
+    if (pizzas_left > 0)
+    {
+        team_2_amount = pizzas_left / (2 * team_2_cnt);
+        pizzas_left -= team_2_amount * 2;
+    }
 
     if (pizzas_left > 0)
     {
@@ -82,21 +85,63 @@ pair<int, pair<int, int>> choose_team_sizes(int pizzas_cnt, int team_2_cnt, int 
     return {team_2_amount, {team_3_amount, team_4_amount}};
 }
 
-struct Comparator
+struct Pizza
 {
-    Comparator() {}
+    Pizza() {}
 
-    bool operator()(vector<int> &first, vector<int> &second) const
+    Pizza(int i) : id(i) {}
+
+    Pizza &operator=(const Pizza &other)
     {
-        return first.size() > second.size();
+        ingredients = other.ingredients;
+        id = other.id;
+        return *this;
+    }
+
+    bool operator==(const Pizza &other) const
+    {
+        return id == other.id && ingredients == other.ingredients;
+    }
+
+    vector<int> ingredients;
+    int id = -1;
+};
+
+struct PizzaHash
+{
+    size_t operator()(const Pizza &v) const
+    {
+        hash<int> hasher;
+        size_t seed = 0;
+        for (int i : v.ingredients)
+        {
+            seed ^= hasher(i) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+        }
+        return seed ^ v.id;
     }
 };
+
+int GetHash(const string &s)
+{
+    ll hash = 0;
+    const int HASH_MOD = 1e9 + 7;
+    const ll PRIME = 97;
+    for (auto c : s)
+    {
+        int c_hash = c != '-' ? (c - 'a' + 1) : 27;
+        hash = ((hash * PRIME) % HASH_MOD + c_hash) % HASH_MOD;
+    }
+    return (int)hash;
+}
 
 void solve()
 {
     int pizzas_cnt, team_2_cnt, team_3_cnt, team_4_cnt;
     cin >> pizzas_cnt >> team_2_cnt >> team_3_cnt >> team_4_cnt;
-    vector<vector<string>> pizza_ingr(pizzas_cnt);
+
+    vector<vector<int>> input(pizzas_cnt);
+    unordered_set<Pizza, PizzaHash> pizza_ingr;
+
     for (int i = 0; i < pizzas_cnt; ++i)
     {
         int k;
@@ -105,8 +150,18 @@ void solve()
         {
             string s;
             cin >> s;
-            pizza_ingr[i].push_back(s);
+            input[i].push_back(GetHash(s));
         }
+    }
+
+    for (int i = 0; i < pizzas_cnt; ++i)
+    {
+        Pizza pizza;
+
+        pizza.id = i + 1;
+        pizza.ingredients = input[i];
+
+        pizza_ingr.emplace(pizza);
     }
 
     pair<int, pair<int, int>> team_sizes = choose_team_sizes(pizzas_cnt, team_2_cnt, team_3_cnt, team_4_cnt);
@@ -114,32 +169,155 @@ void solve()
     //Output: need vector<vector<int>> delivered_pizzas - indices of delivered pizzas to one team
     vector<vector<int>> delivered_pizzas = {};
 
-    sort(pizza_ingr.begin(), pizza_ingr.end(), Comparator());
-
     while (team_sizes.first > 0)
     {
         unordered_set<int> current_ingredients;
+        vector<int> pizzas;
 
-        for (int ingr : pizza_ingr.back())
+        for (int j = 0; j < 2; j++)
         {
-            current_ingredients.emplace(ingr);
+            int max_addition = 0;
+            Pizza max_pizza;
+
+            for (Pizza pizza : pizza_ingr)
+            {
+                int current_addition = 0;
+                for (int ingr : pizza.ingredients)
+                {
+                    if (current_ingredients.count(ingr) == 0)
+                    {
+                        current_addition++;
+                    }
+                }
+
+                if (current_addition > max_addition)
+                {
+                    max_addition = current_addition;
+                    max_pizza = pizza;
+                }
+            }
+
+            for (int ingr : max_pizza.ingredients)
+            {
+                current_ingredients.emplace(ingr);
+            }
+
+            pizzas.push_back(max_pizza.id);
+
+            pizza_ingr.erase(pizza_ingr.find(max_pizza));
         }
 
-        for (int i = 0; i < pizza_ingr.size(); i++)
+        delivered_pizzas.push_back(vector<int>());
+
+        for (int id : pizzas)
         {
+            delivered_pizzas.back().push_back(id);
         }
+
+        team_sizes.first--;
     }
 
-    cout << "Pizza are delivered to " << delivered_pizzas.size() << " teams\n";
+    while (team_sizes.second.first > 0)
+    {
+        unordered_set<int> current_ingredients;
+        vector<int> pizzas;
+
+        for (int j = 0; j < 3; j++)
+        {
+            int max_addition = 0;
+            Pizza max_pizza;
+
+            for (Pizza pizza : pizza_ingr)
+            {
+                int current_addition = 0;
+                for (int ingr : pizza.ingredients)
+                {
+                    if (current_ingredients.count(ingr) == 0)
+                    {
+                        current_addition++;
+                    }
+                }
+
+                if (current_addition > max_addition)
+                {
+                    max_addition = current_addition;
+                    max_pizza = pizza;
+                }
+            }
+
+            for (int ingr : max_pizza.ingredients)
+            {
+                current_ingredients.emplace(ingr);
+            }
+
+            pizzas.push_back(max_pizza.id);
+        }
+
+        delivered_pizzas.push_back(vector<int>());
+
+        for (int id : pizzas)
+        {
+            delivered_pizzas.back().push_back(id);
+        }
+
+        team_sizes.second.first--;
+    }
+
+    while (team_sizes.second.second > 0)
+    {
+        unordered_set<int> current_ingredients;
+        vector<int> pizzas;
+
+        for (int j = 0; j < 4; j++)
+        {
+            int max_addition = 0;
+            Pizza max_pizza;
+
+            for (Pizza pizza : pizza_ingr)
+            {
+                int current_addition = 0;
+                for (int ingr : pizza.ingredients)
+                {
+                    if (current_ingredients.count(ingr) == 0)
+                    {
+                        current_addition++;
+                    }
+                }
+
+                if (current_addition > max_addition)
+                {
+                    max_addition = current_addition;
+                    max_pizza = pizza;
+                }
+            }
+
+            for (int ingr : max_pizza.ingredients)
+            {
+                current_ingredients.emplace(ingr);
+            }
+
+            pizzas.push_back(max_pizza.id);
+        }
+
+        delivered_pizzas.push_back(vector<int>());
+
+        for (int id : pizzas)
+        {
+            delivered_pizzas.back().push_back(id);
+        }
+
+        team_sizes.second.second--;
+    }
+
+    cout << delivered_pizzas.size() << "\n";
     for (auto &team_pizzas_ind : delivered_pizzas)
     {
-        cout << "A " << team_pizzas_ind.size() << "-person team will receive ";
-        cout << "Pizza " << team_pizzas_ind[0];
-        for (int j = 1; j < team_pizzas_ind.size() - 1; ++j)
+        cout << team_pizzas_ind.size();
+        for (auto pizza_ind : team_pizzas_ind)
         {
-            cout << ", Pizza " << team_pizzas_ind[j];
+            cout << " " << pizza_ind;
         }
-        cout << " and Pizza " << team_pizzas_ind.back() << "\n";
+        cout << "\n";
     }
 }
 
