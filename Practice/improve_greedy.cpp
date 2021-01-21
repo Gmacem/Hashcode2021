@@ -110,13 +110,7 @@ struct PizzaHash
 {
     size_t operator()(const Pizza &v) const
     {
-        hash<int> hasher;
-        size_t seed = 0;
-        for (int i : v.ingredients)
-        {
-            seed ^= hasher(i) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-        }
-        return seed ^ v.id;
+        return v.id;
     }
 };
 

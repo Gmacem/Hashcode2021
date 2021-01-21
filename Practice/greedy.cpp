@@ -66,6 +66,12 @@ pair<int, pair<int, int>> choose_team_sizes(int pizzas_cnt, int team_2_cnt, int 
 
     if (pizzas_left > 0)
     {
+        team_2_amount = min(pizzas_left / 2, team_2_cnt);
+        pizzas_left -= 2 * team_2_amount;
+    }
+
+    if (pizzas_left > 0)
+    {
         team_4_amount = min(pizzas_left / 4, team_4_cnt);
         pizzas_left -= 4 * team_4_amount;
     }
@@ -75,12 +81,6 @@ pair<int, pair<int, int>> choose_team_sizes(int pizzas_cnt, int team_2_cnt, int 
         team_3_amount = min(pizzas_left / 3, team_3_cnt);
 
         pizzas_left -= 3 * team_3_amount;
-    }
-
-    if (pizzas_left > 0)
-    {
-        team_2_amount = min(pizzas_left / 2, team_2_cnt);
-        pizzas_left -= 2 * team_2_amount;
     }
 
     return {team_2_amount, {team_3_amount, team_4_amount}};
@@ -110,13 +110,7 @@ struct PizzaHash
 {
     size_t operator()(const Pizza &v) const
     {
-        hash<int> hasher;
-        size_t seed = 0;
-        for (int i : v.ingredients)
-        {
-            seed ^= hasher(i) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-        }
-        return seed ^ v.id;
+        return v.id;
     }
 };
 
@@ -225,11 +219,11 @@ void solve()
     //Output: need vector<vector<int>> delivered_pizzas - indices of delivered pizzas to one team
     vector<vector<int>> delivered_pizzas = {};
 
-    distribute_pizzas(team_sizes.second.second, 4, pizza_ingr, delivered_pizzas);
+    distribute_pizzas(team_sizes.first, 2, pizza_ingr, delivered_pizzas);
 
     distribute_pizzas(team_sizes.second.first, 3, pizza_ingr, delivered_pizzas);
 
-    distribute_pizzas(team_sizes.first, 2, pizza_ingr, delivered_pizzas);
+    distribute_pizzas(team_sizes.second.second, 4, pizza_ingr, delivered_pizzas);
 
     cout << delivered_pizzas.size() << "\n";
     for (auto &team_pizzas_ind : delivered_pizzas)
