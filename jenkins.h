@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <unordered_set>
 #include <vector>
 
 using ll = long long;
@@ -94,15 +95,15 @@ public:
 
     void Print(Answer &answer)
     {
-        out << answer.servers.size() << std::endl;
+        out_ << answer.servers.size() << std::endl;
         for (auto &server : answer.servers)
         {
-            out << server.server_id << " ";
+            out_ << server.server_id << " ";
             for (auto &video : server.videos_to_store)
             {
-                out << video << " ";
+                out_ << video << " ";
             }
-            out << std::endl;
+            out_ << std::endl;
         }
     }
 
@@ -110,7 +111,61 @@ private:
     std::ostream &out_;
 };
 
-long long judge(Creator &c)
+long long judge(Config &data, Creator& creator)
 {
-    return 0;
+    std::vector<std::unordered_set<int>> videos_in_servers;
+    videos_in_servers.resize(data.cache_servers_count);
+
+    for (auto server : creator.answer.servers)
+    {
+        for (auto video : server.videos_to_store)
+        {
+            videos_in_servers[server.server_id].emplace(video);
+        }
+    }
+
+    ll score = 0;
+
+    for (auto i = 0; i < data.request_count; ++i)
+    {
+        Request &current = data.requests[i];
+        ll min_val = __LONG_LONG_MAX__;
+
+        for (auto j = 0; j < data.cache_servers_count; ++j)
+        {
+            CacheConnection server;
+            server.server_id = -1;
+            for (auto conn : data.connections[current.endpoint_id].cache_connections)
+            {
+                if (conn.server_id == j)
+                {
+                    server = conn;
+                    break;
+                }
+            }
+
+            if (server.server_id != -1 && videos_in_servers[j].count(current.video_id) && server.latency < min_val)
+            {
+                min_val = server.latency;
+            }
+        }
+
+        if (min_val == __LONG_LONG_MAX__)
+        {
+            continue;
+        }
+
+        score += current.amount_of_requests * (data.connections[current.endpoint_id].datacenter_latency - min_val);
+    }
+
+    ll amount_of_requests = 0;
+
+    for (auto request : data.requests)
+    {
+        amount_of_requests += request.amount_of_requests;
+    }
+
+    score = (score * 1000) / amount_of_requests;
+
+    return score;
 }
