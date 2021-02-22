@@ -8,7 +8,6 @@ using ll = long long;
 
 void solution(Config &data, Creator &creator)
 {
-    int a = 0;
 }
 
 int main()

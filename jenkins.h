@@ -74,6 +74,17 @@ Config parse(std::istream &in)
     return config;
 }
 
+struct CacheServer
+{
+    int server_id;
+    std::vector<int> videos_to_store;
+};
+
+struct Answer
+{
+    std::vector<CacheServer> servers;
+};
+
 class Creator
 {
 public:
@@ -81,8 +92,18 @@ public:
     {
     }
 
-    void Print()
+    void Print(Answer &answer)
     {
+        out << answer.servers.size() << std::endl;
+        for (auto &server : answer.servers)
+        {
+            out << server.server_id << " ";
+            for (auto &video : server.videos_to_store)
+            {
+                out << video << " ";
+            }
+            out << std::endl;
+        }
     }
 
 private:
