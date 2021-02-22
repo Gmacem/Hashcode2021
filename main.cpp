@@ -52,7 +52,7 @@ int main()
 
     solution(data, creator);
 
-    cerr << "Score: " << judge(data, creator) << '\n';
+    cout << "Score: " << judge(data, creator) << '\n';
     clock_t end = clock();
     double time_taken = double(end - start) / double(CLOCKS_PER_SEC);
     cerr << "Time taken by program is : " << fixed
