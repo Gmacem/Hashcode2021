@@ -10,20 +10,20 @@ struct CacheConnection
 {
     int server_id;
     int latency;
-}
+};
 
 struct EndpointConnection
 {
     int datacenter_latency;
     std::vector<CacheConnection> cache_connections;
-}
+};
 
 struct Request
 {
     int video_id;
     int endpoint_id;
     int amount_of_requests;
-}
+};
 
 struct Config
 {
