@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <set>
 #include <vector>
 
 using ll = long long;
@@ -77,7 +78,7 @@ Config parse(std::istream &in)
 struct CacheServer
 {
     int server_id;
-    std::vector<int> videos_to_store;
+    std::set<int> videos_to_store;
 };
 
 struct Answer
@@ -92,17 +93,15 @@ public:
     {
     }
 
-    void Print(Answer &answer)
-    {
-        out << answer.servers.size() << std::endl;
+    void Print(Answer &answer) {
+        out_ << answer.servers.size() << std::endl;
         for (auto &server : answer.servers)
         {
-            out << server.server_id << " ";
-            for (auto &video : server.videos_to_store)
-            {
-                out << video << " ";
+            out_ << server.server_id << " ";
+            for (auto &video : server.videos_to_store) {
+                out_ << video << " ";
             }
-            out << std::endl;
+            out_ << std::endl;
         }
     }
 

@@ -6,8 +6,26 @@ using namespace std;
 
 using ll = long long;
 
-void solution(Config &data, Creator &creator)
-{
+bool request_compare(Request& lhs, Request& rhs) {
+    return lhs.amount_of_requests > rhs.amount_of_requests;
+}
+
+bool connection_compare(CacheConnection& lhs, CacheConnection& rhs) {
+    return lhs.latency < rhs.latency;
+}
+
+void solution(Config &data, Creator &creator) {
+    sort(data.requests.begin(), data.requests.end(), request_compare);
+    for (auto& endpoint : data.connections) {
+        sort(endpoint.cache_connections.begin(), endpoint.cache_connections.end(),
+                connection_compare);
+    }
+
+    for (Request& req : data.requests) {
+        int id = req.endpoint_id;
+        for (auto conn : data.connections[id]) {
+        }
+    }
 }
 
 int main()
