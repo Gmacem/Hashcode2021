@@ -22,8 +22,11 @@ void solution(Config &data, Creator &creator) {
     }
 
     for (Request& req : data.requests) {
-        int id = req.endpoint_id;
-        for (auto conn : data.connections[id]) {
+        int video_id = req.video_id;
+        int endpoint_id = req.endpoint_id;
+        int amount = req.amount_of_requests;
+
+        for (auto conn : data.connections[endpoint_id]) {
         }
     }
 }
@@ -34,7 +37,7 @@ int main()
     cin.tie(0), cout.tie(0);
     clock_t start = clock();
     auto data = parse(std::cin);
-    auto creator = Creator(std::cout);
+    auto creator = Creator(std::cout, data);
 
     solution(data, creator);
 

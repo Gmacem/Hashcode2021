@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <assert.h>
 #include <iostream>
 #include <set>
 #include <vector>
@@ -75,27 +76,36 @@ Config parse(std::istream &in)
     return config;
 }
 
-struct CacheServer
-{
+struct CacheServer {
     int server_id;
+    int cap;
     std::set<int> videos_to_store;
 };
 
-struct Answer
-{
+struct Answer {
     std::vector<CacheServer> servers;
 };
 
-class Creator
-{
+class Creator {
 public:
-    explicit Creator(std::ostream &out) : out_(out)
-    {
+    Creator(std::ostream &out, Config config) : out_(out), config(config) {
+        for (int i = 0; i < config.cache_servers_count; ++i) {
+            ans.servers.push_back(CacheServer{i, config.cache_server_capacity, std::set<int>()});
+        }
     }
 
-    void Print(Answer &answer) {
-        out_ << answer.servers.size() << std::endl;
-        for (auto &server : answer.servers)
+    void AddVideo(int server_id, int video_id) {
+        auto& server = ans.servers[server_id];
+        assert(server.cap >= config.video_sizes[video_id]);
+        assert(server.videos_to_store.find(video_id) == server.videos_to_store.end());
+
+        server.cap -= config.video_sizes[video_id];
+        server.videos_to_store.insert(video_id);
+    }
+
+    void Print() {
+        out_ << ans.servers.size() << std::endl;
+        for (auto &server : ans.servers)
         {
             out_ << server.server_id << " ";
             for (auto &video : server.videos_to_store) {
@@ -104,6 +114,9 @@ public:
             out_ << std::endl;
         }
     }
+public:
+    Answer ans;
+    Config config;
 
 private:
     std::ostream &out_;
