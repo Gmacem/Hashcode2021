@@ -4,6 +4,7 @@
 #include <assert.h>
 #include <iostream>
 #include <unordered_set>
+#include <unordered_map>
 #include <set>
 #include <vector>
 
@@ -151,6 +152,17 @@ long long judge(Config &data, Creator &creator)
         }
     }
 
+    std::vector<std::unordered_map<int, int>> cache_latencies;
+    cache_latencies.resize(data.endpoint_count);
+
+    for (auto i = 0; i < data.endpoint_count; ++i)
+    {
+        for (auto latency : data.connections[i].cache_connections)
+        {
+            cache_latencies[i][latency.server_id] = latency.latency;
+        }
+    }
+
     ll score = 0;
 
     for (auto i = 0; i < data.request_count; ++i)
@@ -160,21 +172,11 @@ long long judge(Config &data, Creator &creator)
 
         for (auto j = 0; j < data.cache_servers_count; ++j)
         {
-            CacheConnection server;
-            server.server_id = -1;
-
-            for (auto conn : data.connections[current.endpoint_id].cache_connections)
+            if (cache_latencies[current.endpoint_id].count(j) &&
+                videos_in_servers[j].count(current.video_id) &&
+                cache_latencies[current.endpoint_id][j] < min_val)
             {
-                if (conn.server_id == j)
-                {
-                    server = conn;
-                    break;
-                }
-            }
-
-            if (server.server_id != -1 && videos_in_servers[j].count(current.video_id) && server.latency < min_val)
-            {
-                min_val = server.latency;
+                min_val = cache_latencies[current.endpoint_id][j];
             }
         }
 
