@@ -155,11 +155,18 @@ long long judge(Config &data, Creator &creator)
     std::vector<std::unordered_map<int, int>> cache_latencies;
     cache_latencies.resize(data.endpoint_count);
 
+    ll min_latency = __LONG_LONG_MAX__;
+
     for (auto i = 0; i < data.endpoint_count; ++i)
     {
         for (auto latency : data.connections[i].cache_connections)
         {
             cache_latencies[i][latency.server_id] = latency.latency;
+
+            if (latency.latency < min_latency)
+            {
+                min_latency = latency.latency;
+            }
         }
     }
 
@@ -184,12 +191,12 @@ long long judge(Config &data, Creator &creator)
 
         if (min_val == __LONG_LONG_MAX__)
         {
-            max_possible_score += current.amount_of_requests * data.connections[current.endpoint_id].datacenter_latency;
+            max_possible_score += current.amount_of_requests * (data.connections[current.endpoint_id].datacenter_latency - min_latency);
             continue;
         }
 
         score += current.amount_of_requests * (data.connections[current.endpoint_id].datacenter_latency - min_val);
-        max_possible_score += current.amount_of_requests * data.connections[current.endpoint_id].datacenter_latency;
+        max_possible_score += current.amount_of_requests * (data.connections[current.endpoint_id].datacenter_latency - min_latency);
     }
 
     ll amount_of_requests = 0;
@@ -202,7 +209,7 @@ long long judge(Config &data, Creator &creator)
     score = (score * 1000) / amount_of_requests;
     max_possible_score = (max_possible_score * 1000) / amount_of_requests;
 
-    std::cout << "Max possible score:" << max_possible_score << std::endl;
+    // std::cout << "Max possible score:" << max_possible_score << std::endl;
 
     return score;
 }
