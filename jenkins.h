@@ -117,6 +117,39 @@ public:
         server.videos_to_store.insert(video_id);
     }
 
+    bool TryAddVideo(int server_id, int video_id)
+    {
+        auto &server = ans.servers[server_id];
+
+        if (server.cap >= config.video_sizes[video_id] || server.videos_to_store.find(video_id) != server.videos_to_store.end())
+        {
+            return false;
+        }
+
+        server.cap -= config.video_sizes[video_id];
+        server.videos_to_store.insert(video_id);
+
+        return true;
+    }
+
+    bool TryRemoveVideo(int server_id, int video_id)
+    {
+        auto &server = ans.servers[server_id];
+
+        auto video = server.videos_to_store.find(video_id);
+
+        if (video == server.videos_to_store.end())
+        {
+            return false;
+        }
+
+        server.cap += config.video_sizes[video_id];
+
+        server.videos_to_store.erase(video);
+
+        return true;
+    }
+
     void Print()
     {
         out_ << ans.servers.size() << std::endl;
