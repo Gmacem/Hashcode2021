@@ -6,8 +6,40 @@ using namespace std;
 
 using ll = long long;
 
+bool request_compare(Request &lhs, Request &rhs)
+{
+    return lhs.amount_of_requests > rhs.amount_of_requests;
+}
+
+bool connection_compare(CacheConnection &lhs, CacheConnection &rhs)
+{
+    return lhs.latency < rhs.latency;
+}
+
 void solution(Config &data, Creator &creator)
 {
+    sort(data.requests.begin(), data.requests.end(), request_compare);
+    for (auto &endpoint : data.connections)
+    {
+        sort(endpoint.cache_connections.begin(), endpoint.cache_connections.end(),
+             connection_compare);
+    }
+
+    for (Request &req : data.requests)
+    {
+        int video_id = req.video_id;
+        int endpoint_id = req.endpoint_id;
+        int amount = req.amount_of_requests;
+
+        for (auto conn : data.connections[endpoint_id].cache_connections)
+        {
+            if (creator.AppropriateForVideo(conn.server_id, video_id))
+            {
+                creator.AddVideo(conn.server_id, video_id);
+                break;
+            }
+        }
+    }
 }
 
 int main()
@@ -26,6 +58,5 @@ int main()
     cerr << "Time taken by program is : " << fixed
          << time_taken << setprecision(5);
     cerr << " sec " << endl;
-
     return 0;
 }

@@ -100,6 +100,12 @@ public:
         }
     }
 
+    bool AppropriateForVideo(int server_id, int video_id)
+    {
+        return ans.servers[server_id].cap >= config.video_sizes[video_id] &&
+               ans.servers[server_id].videos_to_store.find(video_id) == ans.servers[server_id].videos_to_store.end();
+    }
+
     void AddVideo(int server_id, int video_id)
     {
         auto &server = ans.servers[server_id];
