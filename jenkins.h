@@ -165,6 +165,8 @@ long long judge(Config &data, Creator &creator)
 
     ll score = 0;
 
+    ll max_possible_score = 0;
+
     for (auto i = 0; i < data.request_count; ++i)
     {
         Request &current = data.requests[i];
@@ -182,10 +184,12 @@ long long judge(Config &data, Creator &creator)
 
         if (min_val == __LONG_LONG_MAX__)
         {
+            max_possible_score += current.amount_of_requests * data.connections[current.endpoint_id].datacenter_latency;
             continue;
         }
 
         score += current.amount_of_requests * (data.connections[current.endpoint_id].datacenter_latency - min_val);
+        max_possible_score += current.amount_of_requests * data.connections[current.endpoint_id].datacenter_latency;
     }
 
     ll amount_of_requests = 0;
@@ -196,6 +200,9 @@ long long judge(Config &data, Creator &creator)
     }
 
     score = (score * 1000) / amount_of_requests;
+    max_possible_score = (max_possible_score * 1000) / amount_of_requests;
+
+    std::cout << "Max possible score:" << max_possible_score << std::endl;
 
     return score;
 }
