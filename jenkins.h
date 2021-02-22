@@ -1,8 +1,10 @@
 #pragma once
 
 #include <algorithm>
+#include <assert.h>
 #include <iostream>
 #include <unordered_set>
+#include <set>
 #include <vector>
 
 using ll = long long;
@@ -78,7 +80,8 @@ Config parse(std::istream &in)
 struct CacheServer
 {
     int server_id;
-    std::vector<int> videos_to_store;
+    int cap;
+    std::set<int> videos_to_store;
 };
 
 struct Answer
@@ -89,14 +92,28 @@ struct Answer
 class Creator
 {
 public:
-    explicit Creator(std::ostream &out) : out_(out)
+    Creator(std::ostream &out, Config config) : out_(out), config(config)
     {
+        for (int i = 0; i < config.cache_servers_count; ++i)
+        {
+            ans.servers.push_back(CacheServer{i, config.cache_server_capacity, std::set<int>()});
+        }
     }
 
-    void Print(Answer &answer)
+    void AddVideo(int server_id, int video_id)
     {
-        out_ << answer.servers.size() << std::endl;
-        for (auto &server : answer.servers)
+        auto &server = ans.servers[server_id];
+        assert(server.cap >= config.video_sizes[video_id]);
+        assert(server.videos_to_store.find(video_id) == server.videos_to_store.end());
+
+        server.cap -= config.video_sizes[video_id];
+        server.videos_to_store.insert(video_id);
+    }
+
+    void Print()
+    {
+        out_ << ans.servers.size() << std::endl;
+        for (auto &server : ans.servers)
         {
             out_ << server.server_id << " ";
             for (auto &video : server.videos_to_store)
@@ -107,16 +124,20 @@ public:
         }
     }
 
+public:
+    Answer ans;
+    Config config;
+
 private:
     std::ostream &out_;
 };
 
-long long judge(Config &data, Creator& creator)
+long long judge(Config &data, Creator &creator)
 {
     std::vector<std::unordered_set<int>> videos_in_servers;
     videos_in_servers.resize(data.cache_servers_count);
 
-    for (auto server : creator.answer.servers)
+    for (auto server : creator.ans.servers)
     {
         for (auto video : server.videos_to_store)
         {
@@ -135,6 +156,7 @@ long long judge(Config &data, Creator& creator)
         {
             CacheConnection server;
             server.server_id = -1;
+
             for (auto conn : data.connections[current.endpoint_id].cache_connections)
             {
                 if (conn.server_id == j)
