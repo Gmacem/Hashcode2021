@@ -62,6 +62,7 @@ struct AnswerMutator
         {
             int first_index = distr(mt_rand);
             int second_index = distr(mt_rand);
+
             if (first_index == second_index || creator.ans.servers[first_index].videos_to_store.empty() || creator.ans.servers[second_index].videos_to_store.empty())
             {
                 continue;
@@ -101,27 +102,24 @@ struct AnswerMutator
 
             if (!creator.TryRemoveVideo(second_index, second_video_index))
             {
-                creator.TryAddVideo(first_index, first_video_index);
+                creator.AddVideo(first_index, first_video_index);
                 continue;
             }
 
             if (!creator.TryAddVideo(first_index, second_video_index))
             {
-                creator.TryAddVideo(first_index, first_video_index);
-                creator.TryAddVideo(second_index, second_video_index);
+                creator.AddVideo(first_index, first_video_index);
+                creator.AddVideo(second_index, second_video_index);
                 continue;
             }
 
-            creator.TryAddVideo(second_index, first_video_index);
-
-            //   if (!)
-            // {
-            //     creator.TryRemoveVideo(first_index, second_video_index);
-            //     creator.AddVideo(first_index, first_video_index);
-            //     creator.AddVideo(second_index, second_video_index);
-            //     continue;
-            // }
-
+            if (!creator.TryAddVideo(second_index, first_video_index))
+            {
+                creator.TryRemoveVideo(first_index, second_video_index);
+                creator.AddVideo(first_index, first_video_index);
+                creator.AddVideo(second_index, second_video_index);
+                continue;
+            }
             success = true;
         }
     }
